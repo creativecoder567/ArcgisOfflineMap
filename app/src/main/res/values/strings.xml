@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ArcgisOfflineMap</string>
+    <string name="local_tpk1">0201010001.tpk</string>
+    <string name="local_tpk2">1201010002.tpk</string>
+    <string name="local_tpk3">1201010003.tpk</string>
+    <string name="location_permission_denied">LocationDisplayManager cannot run because location permission was denied</string>
+</resources>
