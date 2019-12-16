@@ -4,4 +4,7 @@
     <string name="local_tpk2">1201010002.tpk</string>
     <string name="local_tpk3">1201010003.tpk</string>
     <string name="location_permission_denied">LocationDisplayManager cannot run because location permission was denied</string>
+
+    <!-- World Topo Map Service URL -->
+    <string name="world_topo_service">https://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer</string>
 </resources>
