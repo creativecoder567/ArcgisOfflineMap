@@ -21,7 +21,7 @@
         <activity android:name=".DownloadActivity">
 
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".MapActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

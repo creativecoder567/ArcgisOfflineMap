@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.InputDeviceCompat;
 
 import android.Manifest;
 import android.app.ListActivity;
@@ -20,6 +21,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.esri.arcgisruntime.arcgisservices.LabelDefinition;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.FeatureQueryResult;
@@ -27,9 +29,11 @@ import com.esri.arcgisruntime.data.QueryParameters;
 import com.esri.arcgisruntime.data.ServiceFeatureTable;
 import com.esri.arcgisruntime.data.ShapefileFeatureTable;
 import com.esri.arcgisruntime.geometry.Envelope;
+import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.layers.ArcGISTiledLayer;
 import com.esri.arcgisruntime.layers.FeatureLayer;
+import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
@@ -45,6 +49,10 @@ import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleFillSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleRenderer;
+import com.esri.arcgisruntime.symbology.TextSymbol;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 
 
 import java.io.File;
@@ -71,8 +79,10 @@ public class MainActivity extends AppCompatActivity {
     String[] reqPermissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission
             .ACCESS_COARSE_LOCATION};
     ArcGISMap map;
-    private ServiceFeatureTable mServiceFeatureTable;
+//    private ServiceFeatureTable mServiceFeatureTable;
     private Callout mCallout;
+   /* Feature feature = null;
+    private FeatureLayer featureLayer;*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +102,8 @@ public class MainActivity extends AppCompatActivity {
         ArcGISTiledLayer tiledLayerBaseMap = new ArcGISTiledLayer(base);
         ArcGISTiledLayer tiledLayerBaseMap1 = new ArcGISTiledLayer(getResources().getString(R.string.world_topo_service));
 
-        // create a service feature table and a feature layer from it
-        mServiceFeatureTable = new ServiceFeatureTable(getString(R.string.us_daytime_population_url));
+        /*// create a service feature table and a feature layer from it
+        mServiceFeatureTable = new ServiceFeatureTable(getString(R.string.us_daytime_population_url));*/
 
 // set tiled layer as basemap
         Basemap basemap = new Basemap(tiledLayerBaseMap1);
@@ -150,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
         mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.COMPASS_NAVIGATION);
         mLocationDisplay.startAsync();
 
-        symbolizeShapefile();
+        featureLayerShapefile();
 
     }
 
@@ -183,9 +193,54 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, error, Toast.LENGTH_LONG).show();
 //                Log.e(TAG, error);
             }
+/*
+            // create objects required to do a selection with a query
+            QueryParameters query = new QueryParameters();
+            // make search case insensitive
+            query.setWhereClause("1=1" );
+
+            ListenableFuture<FeatureQueryResult> future = mServiceFeatureTable.queryFeaturesAsync(query,ServiceFeatureTable.QueryFeatureFields.LOAD_ALL);
+
+            future.addDoneListener(() -> {
+
+                try {
+                    Iterator<Feature> iterator = ((FeatureQueryResult) future.get()).iterator();
+                    feature = iterator.next();
+                    String hardcode = this.feature.getGeometry().toJson();
+                    Log.d("geomjson", hardcode);
+                    TextSymbol textSymbol = new TextSymbol();
+                    textSymbol.setSize(20.0f);
+                    textSymbol.setColor(-16776961);
+                    textSymbol.setHaloColor(InputDeviceCompat.SOURCE_ANY);
+                    textSymbol.setHaloWidth(2.0f);
+                    JsonObject json = new JsonObject();
+                    JsonObject expressionInfo = new JsonObject();
+                    expressionInfo.add("expression", new JsonPrimitive("$feature.surveynumb"));
+                    json.add("labelExpressionInfo", expressionInfo);
+                    json.add("symbol", new JsonParser().parse(textSymbol.toJson()));
+                    this.featureLayer.getLabelDefinitions().add(LabelDefinition.fromJson(json.toString()));
+                    this.featureLayer.setLabelsEnabled(true);
+                    mMapView.getMap().getOperationalLayers().add((Layer) this.featureLayer);
+                    mMapView.setViewpointAsync(new Viewpoint(this.featureLayer.getFullExtent()));
+                    if (hardcode.contains("]],[[")) {
+                        String polygon_part1 = hardcode.split("]],\\[\\[")[0];
+                        String polygon_part2 = hardcode.split("]]],")[1];
+                        Log.d("hardcord", polygon_part1 + "]]]," + polygon_part2);
+                        this.feature.setGeometry(Geometry.fromJson(polygon_part1 + "]]]," + polygon_part2));
+                    }
+                    Toast.makeText(this.getApplicationContext(), " features selected", 0).show();
+                } catch (Exception e) {
+                    Log.d("Line no error", String.valueOf(e.getStackTrace()[0].getLineNumber()));
+                    Log.e(this.getResources().getString(R.string.app_name), "Select feature failed: " + e.getMessage());
+                }
+
+            });*/
+
+
+
         });
     }
-    private void symbolizeShapefile() {
+  /*  private void symbolizeShapefile() {
 
         // create a shapefile feature table from the local data
         ShapefileFeatureTable shapefileFeatureTable = new ShapefileFeatureTable(
@@ -194,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         // use the shapefile feature table to create a feature layer
-        FeatureLayer featureLayer = new FeatureLayer(shapefileFeatureTable);
+        featureLayer = new FeatureLayer(shapefileFeatureTable);
 
         // create the Symbol
         SimpleLineSymbol lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.RED, 1.0f);
@@ -256,6 +311,36 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
+            try {
+                Iterator<Feature> iterator = ((FeatureQueryResult) future.get()).iterator();
+                feature = iterator.next();
+                String hardcode = this.feature.getGeometry().toJson();
+                Log.d("geomjson", hardcode);
+                TextSymbol textSymbol = new TextSymbol();
+                textSymbol.setSize(20.0f);
+                textSymbol.setColor(-16776961);
+                textSymbol.setHaloColor(InputDeviceCompat.SOURCE_ANY);
+                textSymbol.setHaloWidth(2.0f);
+                JsonObject json = new JsonObject();
+                JsonObject expressionInfo = new JsonObject();
+                expressionInfo.add("expression", new JsonPrimitive("$feature.surveynumb"));
+                json.add("labelExpressionInfo", expressionInfo);
+                json.add("symbol", new JsonParser().parse(textSymbol.toJson()));
+                this.featureLayer.getLabelDefinitions().add(LabelDefinition.fromJson(json.toString()));
+                this.featureLayer.setLabelsEnabled(true);
+                mMapView.getMap().getOperationalLayers().add((Layer) this.featureLayer);
+                mMapView.setViewpointAsync(new Viewpoint(this.featureLayer.getFullExtent()));
+                if (hardcode.contains("]],[[")) {
+                    String polygon_part1 = hardcode.split("]],\\[\\[")[0];
+                    String polygon_part2 = hardcode.split("]]],")[1];
+                    Log.d("hardcord", polygon_part1 + "]]]," + polygon_part2);
+                    this.feature.setGeometry(Geometry.fromJson(polygon_part1 + "]]]," + polygon_part2));
+                }
+                Toast.makeText(this.getApplicationContext(), " features selected", 0).show();
+            } catch (Exception e) {
+                Log.d("Line no error", String.valueOf(e.getStackTrace()[0].getLineNumber()));
+                Log.e(this.getResources().getString(R.string.app_name), "Select feature failed: " + e.getMessage());
+            }
 
         });
 
@@ -263,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
         // get the callout that shows attributes
         mCallout = mMapView.getCallout();
         // set an on touch listener to listen for click events
-     /*   mMapView.setOnTouchListener(new DefaultMapViewOnTouchListener(this, mMapView) {
+     *//*   mMapView.setOnTouchListener(new DefaultMapViewOnTouchListener(this, mMapView) {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
                 // remove any existing callouts
@@ -327,8 +412,8 @@ public class MainActivity extends AppCompatActivity {
                 });
                 return super.onSingleTapConfirmed(e);
             }
-        });*/
-    }
+        });*//*
+    }*/
 
     private void setupMap() {
         if (mMapView != null) {
