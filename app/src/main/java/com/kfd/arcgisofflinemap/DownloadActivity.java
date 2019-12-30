@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import java.io.File;
 import java.net.URI;
 
 public class DownloadActivity extends AppCompatActivity {

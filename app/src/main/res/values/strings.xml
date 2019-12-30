@@ -7,4 +7,9 @@
 
     <!-- World Topo Map Service URL -->
     <string name="world_topo_service">https://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer</string>
+    <string name="hurricanes_service">
+        https://sampleserver6.arcgisonline.com/arcgis/rest/services/Hurricanes/MapServer/0
+    </string>
+    <string name="us_daytime_population_url">https://services.arcgis.com/jIL9msH9OI208GCb/arcgis/rest/services/USA_Daytime_Population_2016/FeatureServer/0</string>
+    <string name="shapefile_path">2001030001.shp</string>
 </resources>
