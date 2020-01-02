@@ -25,6 +25,7 @@ import com.esri.arcgisruntime.data.FeatureCollectionTable;
 import com.esri.arcgisruntime.data.FeatureQueryResult;
 import com.esri.arcgisruntime.data.QueryParameters;
 import com.esri.arcgisruntime.data.ShapefileFeatureTable;
+import com.esri.arcgisruntime.geometry.Envelope;
 import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.layers.ArcGISTiledLayer;
 import com.esri.arcgisruntime.layers.FeatureCollectionLayer;
@@ -133,7 +134,7 @@ public class MapActivity extends AppCompatActivity {
         mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.COMPASS_NAVIGATION);
         mLocationDisplay.startAsync();
 
-        featureLayerShapefile();
+
     }
 
     private void featureLayerShapefile() {
@@ -150,7 +151,7 @@ public class MapActivity extends AppCompatActivity {
 
                 featureLayer.setOpacity(0.7f);
                 // add the feature layer to the map
-                mMapView.getMap().getOperationalLayers().add(featureLayer);
+//                mMapView.getMap().getOperationalLayers().add(featureLayer);
 
                 // zoom the map to the extent of the shapefile
                 mMapView.setViewpointAsync(new Viewpoint(featureLayer.getFullExtent()));
@@ -186,12 +187,19 @@ public class MapActivity extends AppCompatActivity {
                     JsonObject json = new JsonObject();
                     JsonObject expressionInfo = new JsonObject();
                     expressionInfo.add("expression", new JsonPrimitive("$feature.surveynumb"));
+                    Log.d(TAG, "run: "+"$feature.surveynumb");
+                    Log.d(TAG, "run: "+expressionInfo.toString());
                     json.add("labelExpressionInfo", expressionInfo);
                     json.add("symbol", new JsonParser().parse(textSymbol.toJson()));
                     MapActivity.this.featureLayer.getLabelDefinitions().add(LabelDefinition.fromJson(json.toString()));
                     MapActivity.this.featureLayer.setLabelsEnabled(true);
                     MapActivity.this.mMapView.getMap().getOperationalLayers().add((Layer) MapActivity.this.featureLayer);
-                    MapActivity.this.mMapView.setViewpointAsync(new Viewpoint(MapActivity.this.featureLayer.getFullExtent()));
+                    Envelope envelope = feature.getGeometry().getExtent();
+                    mMapView.setViewpointGeometryAsync(envelope, 10);
+                    // select the feature
+                    featureLayer.selectFeature(feature);
+
+//                    MapActivity.this.mMapView.setViewpointAsync(new Viewpoint(MapActivity.this.featureLayer.getFullExtent()));
                     if (hardcode.contains("]],[[")) {
                         String polygon_part1 = hardcode.split("]],\\[\\[")[0];
                         String polygon_part2 = hardcode.split("]]],")[1];
@@ -247,6 +255,7 @@ public class MapActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        featureLayerShapefile();
         if (mMapView != null) {
             mMapView.resume();
         }
